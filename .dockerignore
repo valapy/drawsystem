@@ -1,0 +1,65 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker files (NO copiar archivos Docker innecesarios)
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+# NO excluir docker/ porque se necesita para el build
+
+# Documentación
+*.md
+README.md
+CHANGELOG.md
+LICENSE
+
+# IDE
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Entorno
+.env.example
+.editorconfig
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# PHP
+/vendor
+
+# Laravel - Storage y cache (se crean en el contenedor)
+/storage/*.key
+/storage/logs/*.log
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/bootstrap/cache/*.php
+
+# Build artifacts
+/public/hot
+/public/storage
+/public/build
+
+# Testing
+phpunit.xml
+.phpunit.result.cache
+/coverage
+
+# Scripts de utilidad (NO necesarios en contenedor)
+*.sh
+!docker/entrypoint.sh
+setup.sh
+fix-*.sh
+install-*.sh
+rebuild-*.sh
