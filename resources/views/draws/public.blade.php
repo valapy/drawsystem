@@ -6,17 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sorteo: {{ $draw->name }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        body {
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            height: 100vh;
+    <style>
+        .draw-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
         }
 
         .draw-container {
@@ -30,178 +31,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            @if ($draw->background_image)
-                background-image: url('{{ asset('storage/'.$draw->background_image) }}');
-            @else
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            @if ($draw->background_image) background-image: url('{{ asset('storage/'.$draw->background_image) }}');
+            @else background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             @endif
-        }
-
-        .draw-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
-        }
-
-        .content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .title {
-            font-size: 3rem;
-            color: white;
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
-            margin-bottom: 60px;
-            font-weight: bold;
-        }
-
-        .display-box {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 80px;
-            min-width: 600px;
-            min-height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            margin-bottom: 50px;
-        }
-
-        .participant-name {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: #333;
-            transition: all 0.1s ease;
-        }
-
-        .participant-name.shuffling {
-            animation: shuffle 0.1s infinite;
-        }
-
-        .participant-name.winner {
-            color: #667eea;
-            animation: winner-pulse 0.6s ease-in-out;
-            font-size: 4rem;
-        }
-
-        @keyframes shuffle {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        @keyframes winner-pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        .draw-button {
-            padding: 25px 80px;
-            font-size: 2rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .draw-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-        }
-
-        .draw-button:active {
-            transform: translateY(0);
-        }
-
-        .draw-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* 👇 1. ESTILOS MODIFICADOS PARA EL CONTENEDOR DERECHO */
-        .winners-container {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            z-index: 3;
-            width: 320px;
-            max-height: calc(100vh - 60px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .winners-container .counter {
-             margin-bottom: 15px;
-             padding-bottom: 10px;
-             border-bottom: 2px solid #ddd;
-             text-align: center;
-        }
-
-        .winners-list-side {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-        }
-
-        .winners-list-side li {
-            background-color: #f0f0f0;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-            font-weight: normal;
-            color: #444;
-        }
-        /* ---------------------------------------------------- */
-
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background: #f0f;
-            position: absolute;
-            animation: confetti-fall 3s linear infinite;
-        }
-
-        @keyframes confetti-fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
         }
     </style>
 </head>
@@ -211,7 +43,7 @@
 
         <div class="winners-container">
             <div class="counter">
-                Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->max_winners }}
+                Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->participants()->count() }}
             </div>
 
             <h4 style="font-size: 1.1rem; margin-bottom: 10px; color: #333;">Lista de Ganadores:</h4>
