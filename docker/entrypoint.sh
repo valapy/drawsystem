@@ -13,11 +13,6 @@ mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/bootstrap/cache
 mkdir -p /var/www/html/storage/app/public
 
-# Arreglar ownership de directorios críticos
-echo "📁 Configurando permisos de storage y cache..."
-chown -R www-data:www-data /var/www/html/storage 2>/dev/null || true
-chown -R www-data:www-data /var/www/html/bootstrap/cache 2>/dev/null || true
-
 # Permisos de directorios
 chmod -R 775 /var/www/html/storage 2>/dev/null || true
 chmod -R 775 /var/www/html/bootstrap/cache 2>/dev/null || true

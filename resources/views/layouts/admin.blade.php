@@ -31,9 +31,6 @@
                     <a href="{{ route('draws.index') }}" class="text-gray-600 hover:text-gray-900">
                         Sorteos
                     </a>
-                    <a href="{{ route('draws.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        + Nuevo Sorteo
-                    </a>
 
                     @auth
                     <form action="{{ route('logout') }}" method="POST" class="inline">

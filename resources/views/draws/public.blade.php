@@ -30,8 +30,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            @if($draw->background_image) background-image: url('{{ Storage::url($draw->background_image) }}');
-            @else background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            @if ($draw->background_image)
+                background-image: url('{{ asset('storage/'.$draw->background_image) }}');
+            @else
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             @endif
         }
 
@@ -143,18 +145,48 @@
             cursor: not-allowed;
         }
 
-        .winners-count {
+        /* 👇 1. ESTILOS MODIFICADOS PARA EL CONTENEDOR DERECHO */
+        .winners-container {
             position: absolute;
             top: 30px;
             right: 30px;
             background: rgba(255, 255, 255, 0.9);
-            padding: 15px 30px;
-            border-radius: 30px;
+            padding: 20px;
+            border-radius: 20px;
             font-size: 1.2rem;
             font-weight: bold;
             color: #333;
             z-index: 3;
+            width: 320px;
+            max-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
         }
+
+        .winners-container .counter {
+             margin-bottom: 15px;
+             padding-bottom: 10px;
+             border-bottom: 2px solid #ddd;
+             text-align: center;
+        }
+
+        .winners-list-side {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .winners-list-side li {
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            font-weight: normal;
+            color: #444;
+        }
+        /* ---------------------------------------------------- */
 
         .confetti {
             position: fixed;
@@ -176,16 +208,25 @@
 
 <body>
     <div class="draw-container">
-        <div class="winners-count">
-            Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->participants()->count() }}
-        </div>
 
+        <div class="winners-container">
+            <div class="counter">
+                Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->max_winners }}
+            </div>
+
+            <h4 style="font-size: 1.1rem; margin-bottom: 10px; color: #333;">Lista de Ganadores:</h4>
+            <ul id="winners-list" class="winners-list-side">
+                @foreach ($draw->winners as $winner)
+                <li>{{ $winner->participant->display_value }}</li>
+                @endforeach
+            </ul>
+        </div>
         <div class="content">
             <h1 class="title">{{ $draw->name }}</h1>
 
             <div class="display-box">
                 <div class="participant-name" id="participant-display">
-                    Presiona SORTEAR
+                    ¡Comenzar el sorteo!
                 </div>
             </div>
 
@@ -202,13 +243,15 @@
         let currentIndex = 0;
         const displayElement = document.getElementById('participant-display');
         const buttonElement = document.getElementById('draw-button');
+
+        // 👇 3. JAVASCRIPT APUNTANDO A LOS NUEVOS ELEMENTOS
         const winnersCountElement = document.getElementById('winners-count');
+        const winnersListElement = document.getElementById('winners-list');
 
         // Cargar participantes al inicio
         async function loadParticipants() {
             try {
-                const response = await fetch('{{ route('
-                    draws.participants ', $draw) }}');
+                const response = await fetch('{{ route('draws.participants', $draw) }}');
                 const data = await response.json();
                 participants = data;
 
@@ -240,7 +283,7 @@
             shuffleInterval = setInterval(() => {
                 currentIndex = Math.floor(Math.random() * participants.length);
                 displayElement.textContent = participants[currentIndex].display_value;
-            }, 100);
+            }, 20);
         }
 
         async function stopShuffle() {
@@ -251,16 +294,14 @@
             buttonElement.textContent = 'SORTEAR';
             buttonElement.disabled = true;
 
-            // Realizar el sorteo en el backend
             try {
-                const response = await fetch('{{ route('
-                    draws.perform ', $draw) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        }
-                    });
+                const response = await fetch('{{ route('draws.perform', $draw) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
 
                 const data = await response.json();
 
@@ -269,26 +310,21 @@
                     displayElement.classList.remove('shuffling');
                     displayElement.classList.add('winner');
 
-                    // Actualizar contador de ganadores
-                    const currentCount = parseInt(winnersCountElement.textContent);
-                    winnersCountElement.textContent = currentCount + 1;
+                    // Actualizar contador
+                    winnersCountElement.textContent = parseInt(winnersCountElement.textContent) + 1;
 
-                    // Crear confetti
+                    // Añadir ganador a la lista
+                    const listItem = document.createElement('li');
+                    listItem.textContent = data.winner.display_value;
+                    winnersListElement.appendChild(listItem);
+                    winnersListElement.scrollTop = winnersListElement.scrollHeight; // Auto-scroll
+
                     createConfetti();
-
-                    // Recargar participantes disponibles
                     await loadParticipants();
-
-                    // Reactivar botón después de 3 segundos
-                    setTimeout(() => {
-                        buttonElement.disabled = false;
-                        displayElement.classList.remove('winner');
-                        if (participants.length > 0) {
-                            displayElement.textContent = 'Presiona SORTEAR';
-                        }
-                    }, 3000);
-                } else {
                     buttonElement.disabled = false;
+                } else {
+                    displayElement.textContent = 'Sorteo finalizado';
+                    buttonElement.disabled = true;
                 }
             } catch (error) {
                 console.error('Error realizando sorteo:', error);
@@ -307,19 +343,17 @@
                     confetti.style.left = Math.random() * 100 + '%';
                     confetti.style.top = '-10px';
                     confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDelay = Math.random() * 0.3 + 's';
                     confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
                     document.body.appendChild(confetti);
 
-                    setTimeout(() => confetti.remove(), 3000);
+                    setTimeout(() => confetti.remove(), 2000);
                 }, i * 20);
             }
         }
 
-        // Cargar participantes al iniciar
         loadParticipants();
 
-        // Permitir sortear con la tecla ESPACIO
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && !buttonElement.disabled) {
                 e.preventDefault();

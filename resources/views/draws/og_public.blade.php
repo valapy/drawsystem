@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sorteo: {{ $draw->name }}</title>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>Sorteo: {{ $draw->name }}</title>
+        <style>
         * {
             margin: 0;
             padding: 0;
@@ -93,26 +93,26 @@
 
         @keyframes shuffle {
 
-            0%,
-            100% {
-                transform: translateY(0);
-            }
+        0%,
+        100% {
+            transform: translateY(0);
+        }
 
-            50% {
-                transform: translateY(-5px);
-            }
+        50% {
+            transform: translateY(-5px);
+        }
         }
 
         @keyframes winner-pulse {
 
-            0%,
-            100% {
-                transform: scale(1);
-            }
+        0%,
+        100% {
+            transform: scale(1);
+        }
 
-            50% {
-                transform: scale(1.1);
-            }
+        50% {
+            transform: scale(1.1);
+        }
         }
 
         .draw-button {
@@ -166,36 +166,45 @@
         }
 
         @keyframes confetti-fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
         }
-    </style>
-</head>
+        }
+        </style>
+    </head>
 
-<body>
-    <div class="draw-container">
-        <div class="winners-count">
-            Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->participants()->count() }}
-        </div>
-
-        <div class="content">
-            <h1 class="title">{{ $draw->name }}</h1>
-
-            <div class="display-box">
-                <div class="participant-name" id="participant-display">
-                    Presiona SORTEAR
+    <body>
+        <div class="draw-container">
+            <div class="winners-count">
+                Ganadores: <span id="winners-count">{{ $draw->winners()->count() }}</span> / {{ $draw->participants()->count() }}
+                <div class="mt-6 text-left">
+                    <h4 class="text-xl font-semibold text-gray-600">Lista de Ganadores:</h4>
+                    <ul id="winners-list" class="mt-2 list-decimal list-inside bg-gray-50 p-4 rounded-lg shadow-inner max-h-48 overflow-y-auto">
+                        @foreach ($draw->winners as $winner)
+                        <li class="text-gray-800 p-2 border-b">{{ $winner->participant->name }} ({{ $winner->participant->identifier }})</li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
 
-            <button class="draw-button" id="draw-button" onclick="toggleDraw()">
-                SORTEAR
-            </button>
-        </div>
-    </div>
 
-    <script>
+            <div class="content">
+                <h1 class="title">{{ $draw->name }}</h1>
+
+                <div class="display-box">
+                    <div class="participant-name" id="participant-display">
+                        ¡Comenzar el sorteo!
+                    </div>
+                </div>
+
+                <button class="draw-button" id="draw-button" onclick="toggleDraw()">
+                    SORTEAR
+                </button>
+            </div>
+        </div>
+
+        <script>
         let isShuffling = false;
         let shuffleInterval = null;
         let participants = [];
@@ -207,8 +216,7 @@
         // Cargar participantes al inicio
         async function loadParticipants() {
             try {
-                const response = await fetch('{{ route('
-                    draws.participants ', $draw) }}');
+                const response = await fetch('{{ route('draws.participants', $draw) }}');
                 const data = await response.json();
                 participants = data;
 
@@ -240,7 +248,7 @@
             shuffleInterval = setInterval(() => {
                 currentIndex = Math.floor(Math.random() * participants.length);
                 displayElement.textContent = participants[currentIndex].display_value;
-            }, 100);
+            }, 20);
         }
 
         async function stopShuffle() {
@@ -253,8 +261,7 @@
 
             // Realizar el sorteo en el backend
             try {
-                const response = await fetch('{{ route('
-                    draws.perform ', $draw) }}', {
+                const response = await fetch('{{ route('draws.perform', $draw) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -279,14 +286,7 @@
                     // Recargar participantes disponibles
                     await loadParticipants();
 
-                    // Reactivar botón después de 3 segundos
-                    setTimeout(() => {
-                        buttonElement.disabled = false;
-                        displayElement.classList.remove('winner');
-                        if (participants.length > 0) {
-                            displayElement.textContent = 'Presiona SORTEAR';
-                        }
-                    }, 3000);
+                    buttonElement.disabled = false;
                 } else {
                     buttonElement.disabled = false;
                 }
@@ -307,11 +307,11 @@
                     confetti.style.left = Math.random() * 100 + '%';
                     confetti.style.top = '-10px';
                     confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDelay = Math.random() * 0.3 + 's';
                     confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
                     document.body.appendChild(confetti);
 
-                    setTimeout(() => confetti.remove(), 3000);
+                    setTimeout(() => confetti.remove(), 2000);
                 }, i * 20);
             }
         }
@@ -326,7 +326,8 @@
                 toggleDraw();
             }
         });
-    </script>
-</body>
+        </script>
+    </body>
 
 </html>
+

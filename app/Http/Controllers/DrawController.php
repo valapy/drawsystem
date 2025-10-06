@@ -129,6 +129,7 @@ class DrawController extends Controller
             abort(404);
         }
 
+        $draw->load('winners.participant');
         return view('draws.public', compact('draw'));
     }
 
