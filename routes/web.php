@@ -23,6 +23,12 @@ Route::prefix('admin')->group(function () {
 // Pantalla pública del sorteo (para proyectar)
 Route::get('/sorteo/{draw}', [DrawController::class, 'public'])->name('draws.public');
 
+// NUEVO: Rutas de edición
+Route::get('/draws/{draw}/edit', [DrawController::class, 'edit'])->name('draws.edit');
+Route::put('/draws/{draw}', [DrawController::class, 'update'])->name('draws.update');
+Route::post('/draws/{draw}/update-excel', [DrawController::class, 'updateExcel'])->name('draws.update-excel');
+Route::post('/draws/{draw}/update-image', [DrawController::class, 'updateImage'])->name('draws.update-image');
+
 // API para el sorteo en tiempo real
 Route::get('/api/draws/{draw}/participants', [DrawController::class, 'getParticipants'])->name('draws.participants');
 Route::post('/api/draws/{draw}/perform', [DrawController::class, 'performDraw'])->name('draws.perform');

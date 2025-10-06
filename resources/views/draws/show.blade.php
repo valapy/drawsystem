@@ -29,6 +29,9 @@
             </div>
 
             <div class="flex space-x-2">
+                <a href="{{ route('draws.edit', $draw) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    ✏️ Editar Sorteo
+                </a>
                 @if($draw->status === 'active')
                 <a href="{{ route('draws.public', $draw) }}" target="_blank" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                     🎬 Proyectar Sorteo
